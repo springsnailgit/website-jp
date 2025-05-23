@@ -313,9 +313,83 @@ server {
 - XSS 攻击防护
 - CSRF 令牌验证
 
+## 测试报告
+
+### 🧪 最新测试结果 (2025-05-23)
+
+#### ✅ 测试通过项目
+- **服务器启动测试** - 后端服务器成功运行在端口 5005
+- **前端应用测试** - Next.js 应用成功运行在端口 3002
+- **数据库连接测试** - MongoDB 连接正常
+- **API 接口测试** - 所有核心 API 端点正常响应
+- **CORS 配置测试** - 跨域请求问题已解决
+- **前后端集成测试** - 数据交互正常
+- **用户界面测试** - 响应式设计和日式美学界面正常显示
+- **产品展示功能测试** - 分类筛选、搜索、排序功能正常
+
+#### 🔧 测试中修复的问题
+1. **API 端口配置问题**
+   - 问题：前端配置的 API 端点为 `http://localhost:5000`，但后端实际运行在端口 5005
+   - 修复：更新 `website-jp/frontend/src/config/index.ts` 中的 `API_BASE_URL` 配置
+   - 文件：`frontend/src/config/index.ts`
+   ```typescript
+   // 修改前
+   export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+
+   // 修改后
+   export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5005';
+   ```
+
+2. **CORS 跨域访问问题**
+   - 问题：前端运行在端口 3002，但后端 CORS 配置只允许端口 3000 和 4000
+   - 修复：在后端 CORS 配置中添加端口 3002 的支持
+   - 文件：`backend/src/index.ts`
+   ```typescript
+   // 修改前
+   const allowedOrigins = [
+     process.env.CLIENT_URL || 'http://localhost:3000',
+     process.env.ADMIN_URL || 'http://localhost:4000'
+   ];
+
+   // 修改后
+   const allowedOrigins = [
+     process.env.CLIENT_URL || 'http://localhost:3000',
+     process.env.ADMIN_URL || 'http://localhost:4000',
+     'http://localhost:3002'
+   ];
+   ```
+
+3. **端口冲突问题**
+   - 问题：后端服务重启时出现端口 5005 被占用的情况
+   - 修复：使用 `lsof -ti:5005 | xargs kill -9` 清理占用的进程
+
+#### 📊 测试环境配置
+- **操作系统**: macOS
+- **Node.js 版本**: 16+
+- **MongoDB 版本**: Community Edition
+- **浏览器**: Chrome (Puppeteer)
+- **前端端口**: 3002
+- **后端端口**: 5005
+- **数据库端口**: 27017
+
+#### 🎯 测试覆盖范围
+- **功能测试**: 核心业务功能验证
+- **集成测试**: 前后端数据交互测试
+- **界面测试**: 用户界面和响应式设计测试
+- **API 测试**: RESTful API 接口测试
+- **性能测试**: 基础性能指标验证
+
 ## 版本历史
 
-### v1.0.0 (2025-05-23)
+### v1.0.1 (2025-05-23) - 测试版本
+- 🔧 修复 API 端口配置问题
+- 🔧 解决 CORS 跨域访问问题
+- 🔧 优化服务器启动流程
+- ✅ 完成全面功能测试
+- ✅ 验证前后端集成正常
+- 📝 更新项目文档和测试报告
+
+### v1.0.0 (2025-05-23) - 初始版本
 - ✅ 完成基础架构搭建
 - ✅ 实现产品展示系统
 - ✅ 完成用户认证功能

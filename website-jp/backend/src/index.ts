@@ -21,7 +21,8 @@ dotenv.config();
 // 定义允许的源
 const allowedOrigins = [
   process.env.CLIENT_URL || 'http://localhost:3000',
-  process.env.ADMIN_URL || 'http://localhost:4000'
+  process.env.ADMIN_URL || 'http://localhost:4000',
+  'http://localhost:3002'
 ];
 
 /**
