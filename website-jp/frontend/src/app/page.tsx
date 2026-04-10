@@ -109,92 +109,75 @@ const StatsSection = () => (
 );
 
 // ── 关于我们 ───────────────────────────────────────────────────────────────────
-const AboutSection = () => {
-  const [previewImages, setPreviewImages] = useState<string[]>([]);
+const wearingImages = [
+  { src: '/images/about/about-wearing-1.jpg', alt: '项链佩戴特写' },
+  { src: '/images/about/about-wearing-2.jpg', alt: '耳环佩戴特写' },
+  { src: '/images/about/about-wearing-3.jpg', alt: '戒指佩戴特写' },
+  { src: '/images/about/about-wearing-4.jpg', alt: '手链佩戴特写' },
+];
 
-  useEffect(() => {
-    fetch(`${API_BASE_URL}/api/products?limit=4&sort=created_desc`)
-      .then(r => r.json())
-      .then(d => {
-        if (d.success && d.data?.length) {
-          const imgs = d.data
-            .map((p: Product) => p.imageUrls?.[0])
-            .filter(Boolean)
-            .map((u: string) => (u.startsWith('http') ? u : `${API_BASE_URL}${u}`));
-          setPreviewImages(imgs.slice(0, 4));
-        }
-      })
-      .catch(() => {});
-  }, []);
-
-  const placeholderColors = ['bg-stone-200', 'bg-stone-300', 'bg-stone-100', 'bg-stone-200'];
-
-  return (
-    <section className="py-24 bg-white">
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
-          {/* 产品图片拼贴 */}
-          <div className="relative">
-            <div className="grid grid-cols-2 gap-3">
-              {[0, 1, 2, 3].map((i) => (
-                <div key={i} className={`aspect-square rounded-sm overflow-hidden relative ${placeholderColors[i]}`}>
-                  {previewImages[i] ? (
-                    <Image
-                      src={previewImages[i]}
-                      alt={`柏木作品 ${i + 1}`}
-                      fill
-                      className="object-cover hover:scale-105 transition-transform duration-700"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-stone-400 text-3xl">✿</div>
-                  )}
-                </div>
-              ))}
-            </div>
-            {/* 悬浮徽章 */}
-            <div className="absolute -bottom-5 -right-5 w-36 h-36 bg-stone-900 rounded-sm flex flex-col items-center justify-center shadow-xl">
-              <p className="text-4xl font-light text-white">15</p>
-              <p className="text-xs text-stone-300 mt-1 leading-tight text-center tracking-wider">年匠心<br />设计经验</p>
-            </div>
+const AboutSection = () => (
+  <section className="py-24 bg-white">
+    <div className="container mx-auto px-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+        {/* 佩戴特写图片拼贴 */}
+        <div className="relative">
+          <div className="grid grid-cols-2 gap-3">
+            {wearingImages.map((img, i) => (
+              <div key={i} className="aspect-square rounded-sm overflow-hidden relative bg-stone-100">
+                <Image
+                  src={img.src}
+                  alt={img.alt}
+                  fill
+                  className="object-cover hover:scale-105 transition-transform duration-700"
+                />
+              </div>
+            ))}
           </div>
-
-          {/* 文字内容 */}
-          <div className="space-y-6 md:pl-8">
-            <p className="text-xs tracking-[0.3em] text-accent uppercase">About Us · 关于柏木</p>
-            <h2 className="text-3xl font-light text-gray-800 leading-snug">
-              源自日本的<br />匠心工艺
-            </h2>
-            <div className="w-12 h-px bg-accent" />
-            <p className="text-gray-600 leading-relaxed">
-              柏木设计工作室成立于2010年，由日本首饰设计大师柏木杏子创立于东京。我们秉承"物哀"与"侘寂"的东方美学，将自然形态与传统金工技艺融入每一件作品之中。
-            </p>
-            <p className="text-gray-600 leading-relaxed">
-              "花は散り また咲く"——花开花落，周而复始。每一件珠宝都承载着独特的时光印记，珍贵而短暂，正如人与人之间的每一次一期一会。
-            </p>
-            <div className="grid grid-cols-3 gap-4 pt-2">
-              {[
-                { num: 'RA', label: '流纹系列' },
-                { num: 'RG', label: '日光系列' },
-                { num: '6+', label: '产品品类' },
-              ].map((item) => (
-                <div key={item.num} className="text-center border border-stone-100 py-3 rounded-sm">
-                  <p className="text-lg font-medium text-stone-800">{item.num}</p>
-                  <p className="text-xs text-stone-400 mt-0.5">{item.label}</p>
-                </div>
-              ))}
-            </div>
-            <Link href="/about" className="inline-flex items-center gap-2 text-sm text-accent font-medium hover:gap-3 transition-all duration-200">
-              了解品牌故事
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-              </svg>
-            </Link>
+          {/* 悬浮徽章 — 玫瑰金配色 */}
+          <div className="absolute -bottom-5 -right-5 w-36 h-36 rounded-sm flex flex-col items-center justify-center shadow-xl"
+            style={{ background: 'linear-gradient(135deg, #c9a96e 0%, #e8c99a 50%, #c9a96e 100%)' }}>
+            <p className="text-4xl font-light text-white drop-shadow">15</p>
+            <p className="text-xs text-white/90 mt-1 leading-tight text-center tracking-wider drop-shadow">年匠心<br />设计经验</p>
           </div>
         </div>
+
+        {/* 文字内容 */}
+        <div className="space-y-6 md:pl-8">
+          <p className="text-xs tracking-[0.3em] text-accent uppercase">About Us · 关于柏木</p>
+          <h2 className="text-3xl font-light text-gray-800 leading-snug">
+            源自日本的<br />匠心工艺
+          </h2>
+          <div className="w-12 h-px bg-accent" />
+          <p className="text-gray-600 leading-relaxed">
+            柏木设计工作室成立于2010年，由日本首饰设计大师柏木杏子创立于东京。我们秉承"物哀"与"侘寂"的东方美学，将自然形态与传统金工技艺融入每一件作品之中。
+          </p>
+          <p className="text-gray-600 leading-relaxed">
+            "花は散り また咲く"——花开花落，周而复始。每一件珠宝都承载着独特的时光印记，珍贵而短暂，正如人与人之间的每一次一期一会。
+          </p>
+          <div className="grid grid-cols-3 gap-4 pt-2">
+            {[
+              { num: 'RA', label: '流纹系列' },
+              { num: 'RG', label: '日光系列' },
+              { num: '6+', label: '产品品类' },
+            ].map((item) => (
+              <div key={item.num} className="text-center border border-stone-100 py-3 rounded-sm">
+                <p className="text-lg font-medium text-stone-800">{item.num}</p>
+                <p className="text-xs text-stone-400 mt-0.5">{item.label}</p>
+              </div>
+            ))}
+          </div>
+          <Link href="/about" className="inline-flex items-center gap-2 text-sm text-accent font-medium hover:gap-3 transition-all duration-200">
+            了解品牌故事
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </Link>
+        </div>
       </div>
-    </section>
-  );
-};
+    </div>
+  </section>
+);
 
 // ── 精选作品 ───────────────────────────────────────────────────────────────────
 const FeaturedWorksSection = () => {
