@@ -27,7 +27,9 @@ const connectDB = async (): Promise<void> => {
 
   } catch (error: any) {
     console.error(`MongoDB 连接失败: ${error.message}`);
-    process.exit(1);
+    console.error('请检查 MONGO_URI 环境变量是否正确设置');
+    // 延迟退出，让日志有时间输出
+    setTimeout(() => process.exit(1), 1000);
   }
 };
 
