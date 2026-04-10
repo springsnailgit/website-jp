@@ -5,6 +5,9 @@
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express, { Application, NextFunction, Request, Response } from 'express';
+import rateLimit from 'express-rate-limit';
+import mongoSanitize from 'express-mongo-sanitize';
+import helmet from 'helmet';
 import { createServer } from 'http';
 import morgan from 'morgan';
 import { Server } from 'socket.io';
@@ -15,15 +18,46 @@ import productRoutes from './routes/product.routes';
 import userRoutes from './routes/user.routes';
 import { APIError, logError } from './utils/errorHandler';
 
-// 加载环境变量 - 必须在使用process.env之前完成
 dotenv.config();
 
-// 定义允许的源
-const allowedOrigins = [
-  process.env.CLIENT_URL || 'http://localhost:3000',
-  process.env.ADMIN_URL || 'http://localhost:4000',
-  'http://localhost:3002'
-];
+const isProd = process.env.NODE_ENV === 'production';
+
+// 生产环境只允许真实域名；开发环境放行 localhost
+const allowedOrigins = isProd
+  ? [
+      'https://miiqee.com',
+      'https://www.miiqee.com',
+      /\.miiqee\.com$/,
+      /\.pages\.dev$/,
+    ]
+  : [
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'http://localhost:3002',
+      'http://localhost:4000',
+    ];
+
+// ── 限流策略 ──────────────────────────────────────────────────────────────────
+
+/** 登录接口：每 IP 15 分钟内最多 10 次 */
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { success: false, error: '请求过于频繁，请 15 分钟后再试' },
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: () => !isProd, // 开发环境跳过限流
+});
+
+/** 全局 API：每 IP 每分钟最多 120 次 */
+const globalLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 120,
+  message: { success: false, error: '请求过于频繁，请稍后再试' },
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: () => !isProd,
+});
 
 /**
  * 初始化Express应用
@@ -31,21 +65,51 @@ const allowedOrigins = [
 const createApp = (): Application => {
   const app: Application = express();
 
-  // 配置Express中间件
-  app.use(express.json({ limit: '10mb' }));
-  app.use(express.urlencoded({ extended: true }));
+  // 信任代理（Railway / Cloudflare 场景下需要以获取真实 IP）
+  app.set('trust proxy', 1);
+
+  // ── 安全头（Helmet） ────────────────────────────────────────────────────────
+  app.use(helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+    contentSecurityPolicy: false, // API 服务器不需要 CSP
+  }));
+
+  // ── 全局限流 ────────────────────────────────────────────────────────────────
+  app.use('/api', globalLimiter);
+
+  // ── CORS ───────────────────────────────────────────────────────────────────
   app.use(cors({
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true); // 服务端调用/curl 等无 Origin
+      const allowed = allowedOrigins.some(o =>
+        typeof o === 'string' ? o === origin : o.test(origin)
+      );
+      if (allowed) return callback(null, true);
+      console.warn(`[CORS] 拒绝来源: ${origin}`);
+      callback(new Error('CORS 策略不允许该来源'));
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization'],
   }));
-  app.use(morgan(process.env.NODE_ENV === 'development' ? 'dev' : 'combined'));
+
+  // ── 请求体解析 ──────────────────────────────────────────────────────────────
+  app.use(express.json({ limit: '1mb' }));
+  app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+
+  // ── MongoDB 注入防护 ────────────────────────────────────────────────────────
+  // 自动去除请求 body/params/query 中的 $ 和 . 运算符
+  app.use(mongoSanitize({ replaceWith: '_' }));
+
+  // ── 日志 ────────────────────────────────────────────────────────────────────
+  app.use(morgan(isProd ? 'combined' : 'dev'));
+
   app.use('/uploads', express.static('uploads', { maxAge: '1d' }));
   app.use('/uploads/products', express.static('uploads/products', { maxAge: '1d' }));
 
-  // API路由
+  // API路由（登录接口附加专项限流）
   app.use('/api/products', productRoutes);
+  app.use('/api/users/login', loginLimiter);
   app.use('/api/users', userRoutes);
   app.use('/api/chats', chatRoutes);
   app.use('/api/analytics', analyticsRoutes);
