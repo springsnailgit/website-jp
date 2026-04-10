@@ -26,7 +26,7 @@ interface PaginationInfo {
     hasPrevPage: boolean;
 }
 
-interface ApiResponse {
+interface ProductsApiResponse {
     success: boolean;
     data: BackendProduct[];
     meta?: {
@@ -82,10 +82,10 @@ export default function ProductsPage() {
             params.append('limit', '12');
             params.append('sort', sortBy);
 
-            const response = await get<ApiResponse>(`/api/products?${params.toString()}`);
+            const response = await get<ProductsApiResponse>(`/api/products?${params.toString()}`);
 
-            if (response.success && response.data) {
-                setProducts(response.data);
+            if (response.success && response.data && Array.isArray(response.data)) {
+                setProducts(response.data as BackendProduct[]);
                 if (response.meta?.pagination) {
                     setPagination(response.meta.pagination);
                 }
