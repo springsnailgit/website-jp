@@ -49,6 +49,28 @@ const createApp = (): Application => {
   app.use('/api/chats', chatRoutes);
   app.use('/api/analytics', analyticsRoutes);
 
+  // 一次性数据导入接口（用密钥保护）
+  app.get('/api/seed', async (req: Request, res: Response) => {
+    const secret = req.query.secret;
+    if (secret !== process.env.SEED_SECRET) {
+      return res.status(403).json({ success: false, error: '无权限' });
+    }
+    try {
+      const Product = (await import('./models/Product')).default;
+      const User = (await import('./models/User')).default;
+      const { products, adminUser } = await import('./seed-data');
+      await Product.deleteMany({});
+      await Product.insertMany(products);
+      const exists = await User.findOne({ email: adminUser.email });
+      if (!exists) {
+        await User.create(adminUser);
+      }
+      res.json({ success: true, message: `已导入 ${products.length} 个产品和管理员账号` });
+    } catch (err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
   // 健康检查路由
   app.get('/health', (req: Request, res: Response) => {
     res.status(200).json({
