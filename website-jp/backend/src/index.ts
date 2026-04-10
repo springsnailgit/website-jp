@@ -42,6 +42,7 @@ const createApp = (): Application => {
   }));
   app.use(morgan(process.env.NODE_ENV === 'development' ? 'dev' : 'combined'));
   app.use('/uploads', express.static('uploads', { maxAge: '1d' }));
+  app.use('/uploads/products', express.static('uploads/products', { maxAge: '1d' }));
 
   // API路由
   app.use('/api/products', productRoutes);
