@@ -1,0 +1,162 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  --primary: #404040;
+  --secondary: #737373;
+  --accent: #0F766E;
+  --header-height: 80px;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-noto-sc), var(--font-noto-jp), system-ui, -apple-system, sans-serif;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 500;
+  }
+
+  /* 全局滚动条样式 */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: #f1f1f1; }
+  ::-webkit-scrollbar-thumb { background: #d4d4d4; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #a3a3a3; }
+}
+
+@layer components {
+  .container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center rounded-sm px-4 py-2 text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none;
+  }
+
+  .btn-primary {
+    background-color: var(--primary);
+    color: white;
+    letter-spacing: 0.05em;
+  }
+
+  .btn-primary:hover {
+    background-color: #2d2d2d;
+  }
+
+  .btn-outline {
+    @apply border border-gray-300 bg-transparent hover:bg-gray-50;
+  }
+
+  /* 日式分隔线标题 */
+  .jp-divider {
+    @apply flex items-center text-center;
+  }
+  .jp-divider::before,
+  .jp-divider::after {
+    @apply content-[''] flex-1 border-t border-gray-200;
+  }
+  .jp-divider::before { @apply mr-5; }
+  .jp-divider::after  { @apply ml-5; }
+
+  /* 产品卡片 */
+  .product-card {
+    @apply bg-white rounded-sm overflow-hidden transition-all duration-300;
+  }
+  .product-image-container {
+    @apply relative aspect-square overflow-hidden bg-stone-100;
+  }
+  .product-image {
+    @apply object-cover w-full h-full;
+  }
+
+  /* 页面过渡骨架屏 */
+  .skeleton {
+    @apply animate-pulse bg-gray-100 rounded-sm;
+  }
+}
+
+/* ── 动画 ────────────────────────────────────────────────────────────────── */
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  33%       { transform: translateY(-12px) rotate(8deg); }
+  66%       { transform: translateY(-6px) rotate(-5deg); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.animate-fade-in    { animation: fadeIn 0.4s ease-out forwards; }
+.animate-fade-in-up { animation: fadeInUp 0.5s ease-out forwards; }
+.animate-float      { animation: float ease-in-out infinite; }
+
+/* 骨架屏动态渐变 */
+.animate-shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* ── 日式风格细节 ────────────────────────────────────────────────────────── */
+
+/* 印章风格标签 */
+.jp-badge {
+  @apply inline-block text-xs px-2 py-0.5 border tracking-wider;
+  font-variant: small-caps;
+}
+
+/* 细线水平装饰 */
+.jp-line {
+  @apply w-12 h-px bg-accent;
+}
+
+/* 价格强调 */
+.price-tag {
+  color: var(--accent);
+  @apply font-light text-xl tracking-wide;
+}
+
+/* 页面顶部进度条（用于路由切换） */
+#nprogress .bar {
+  background: var(--accent) !important;
+  height: 2px !important;
+}
+
+/* 图片渐入 */
+img {
+  transition: opacity 0.3s ease;
+}
+
+/* 选中文本颜色 */
+::selection {
+  background-color: rgba(15, 118, 110, 0.15);
+  color: var(--foreground);
+}
