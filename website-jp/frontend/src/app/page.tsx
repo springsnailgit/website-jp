@@ -109,51 +109,92 @@ const StatsSection = () => (
 );
 
 // ── 关于我们 ───────────────────────────────────────────────────────────────────
-const AboutSection = () => (
-  <section className="py-24 bg-white">
-    <div className="container mx-auto px-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
-        <div className="relative">
-          <div className="aspect-[4/5] bg-stone-100 rounded-sm overflow-hidden relative">
-            <Image
-              src="/images/design/Japanweb.png"
-              alt="柏木设计工作室"
-              fill
-              className="object-cover"
-            />
-            <div className="absolute inset-0 bg-stone-900/10" />
-          </div>
-          <div className="absolute -bottom-6 -right-6 w-40 h-40 bg-stone-100 rounded-sm flex items-center justify-center p-4 shadow-lg">
-            <div className="text-center">
-              <p className="text-3xl font-light text-stone-800">15</p>
-              <p className="text-xs text-stone-500 mt-1 leading-tight">年匠心<br />设计经验</p>
+const AboutSection = () => {
+  const [previewImages, setPreviewImages] = useState<string[]>([]);
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/api/products?limit=4&sort=created_desc`)
+      .then(r => r.json())
+      .then(d => {
+        if (d.success && d.data?.length) {
+          const imgs = d.data
+            .map((p: Product) => p.imageUrls?.[0])
+            .filter(Boolean)
+            .map((u: string) => (u.startsWith('http') ? u : `${API_BASE_URL}${u}`));
+          setPreviewImages(imgs.slice(0, 4));
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const placeholderColors = ['bg-stone-200', 'bg-stone-300', 'bg-stone-100', 'bg-stone-200'];
+
+  return (
+    <section className="py-24 bg-white">
+      <div className="container mx-auto px-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+          {/* 产品图片拼贴 */}
+          <div className="relative">
+            <div className="grid grid-cols-2 gap-3">
+              {[0, 1, 2, 3].map((i) => (
+                <div key={i} className={`aspect-square rounded-sm overflow-hidden relative ${placeholderColors[i]}`}>
+                  {previewImages[i] ? (
+                    <Image
+                      src={previewImages[i]}
+                      alt={`柏木作品 ${i + 1}`}
+                      fill
+                      className="object-cover hover:scale-105 transition-transform duration-700"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-stone-400 text-3xl">✿</div>
+                  )}
+                </div>
+              ))}
+            </div>
+            {/* 悬浮徽章 */}
+            <div className="absolute -bottom-5 -right-5 w-36 h-36 bg-stone-900 rounded-sm flex flex-col items-center justify-center shadow-xl">
+              <p className="text-4xl font-light text-white">15</p>
+              <p className="text-xs text-stone-300 mt-1 leading-tight text-center tracking-wider">年匠心<br />设计经验</p>
             </div>
           </div>
-        </div>
 
-        <div className="space-y-6 md:pl-8">
-          <p className="text-xs tracking-[0.3em] text-accent uppercase">About Us</p>
-          <h2 className="text-3xl font-light text-gray-800 leading-snug">
-            源自日本的<br />匠心工艺
-          </h2>
-          <div className="w-12 h-px bg-accent" />
-          <p className="text-gray-600 leading-relaxed">
-            柏木设计工作室成立于2010年，由日本首饰设计大师柏木杏子创立。我们秉承日本传统工艺精神，将现代设计美学融入每一件作品中，创造出独具风格的珠宝首饰。
-          </p>
-          <p className="text-gray-600 leading-relaxed">
-            "一期一会"是我们的设计理念——每一件首饰都蕴含着独特的故事和情感，如同花开花落的自然循环，珍贵而短暂。
-          </p>
-          <Link href="/about" className="inline-flex items-center gap-2 text-sm text-accent font-medium hover:gap-3 transition-all duration-200">
-            了解更多
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-            </svg>
-          </Link>
+          {/* 文字内容 */}
+          <div className="space-y-6 md:pl-8">
+            <p className="text-xs tracking-[0.3em] text-accent uppercase">About Us · 关于柏木</p>
+            <h2 className="text-3xl font-light text-gray-800 leading-snug">
+              源自日本的<br />匠心工艺
+            </h2>
+            <div className="w-12 h-px bg-accent" />
+            <p className="text-gray-600 leading-relaxed">
+              柏木设计工作室成立于2010年，由日本首饰设计大师柏木杏子创立于东京。我们秉承"物哀"与"侘寂"的东方美学，将自然形态与传统金工技艺融入每一件作品之中。
+            </p>
+            <p className="text-gray-600 leading-relaxed">
+              "花は散り また咲く"——花开花落，周而复始。每一件珠宝都承载着独特的时光印记，珍贵而短暂，正如人与人之间的每一次一期一会。
+            </p>
+            <div className="grid grid-cols-3 gap-4 pt-2">
+              {[
+                { num: 'RA', label: '流纹系列' },
+                { num: 'RG', label: '日光系列' },
+                { num: '6+', label: '产品品类' },
+              ].map((item) => (
+                <div key={item.num} className="text-center border border-stone-100 py-3 rounded-sm">
+                  <p className="text-lg font-medium text-stone-800">{item.num}</p>
+                  <p className="text-xs text-stone-400 mt-0.5">{item.label}</p>
+                </div>
+              ))}
+            </div>
+            <Link href="/about" className="inline-flex items-center gap-2 text-sm text-accent font-medium hover:gap-3 transition-all duration-200">
+              了解品牌故事
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </Link>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
-);
+    </section>
+  );
+};
 
 // ── 精选作品 ───────────────────────────────────────────────────────────────────
 const FeaturedWorksSection = () => {
@@ -325,9 +366,9 @@ const ProcessSection = () => (
 // ── 客户评价 ───────────────────────────────────────────────────────────────────
 const TestimonialsSection = () => {
   const testimonials = [
-    { name: "佐藤明美", role: "常驻客户", text: "柏木设计的作品充满了日本传统美学的精髓，每一件都让我感受到匠人的用心。特别是樱花系列的耳环，简约而不失优雅。" },
-    { name: "刘小红", role: "新婚客户", text: "定制的结婚戒指超出了我的期望！设计师亲自为我们设计，将我们的故事融入戒指的每一个细节中，终生难忘。" },
-    { name: "Jennifer Smith", role: "设计师", text: "作为一名珠宝设计师，柏木团队的技术支持非常专业。Schematiq软件极大地提升了我的工作效率，强烈推荐！" },
+    { name: "佐藤明美", role: "常驻客户 · 东京", text: "柏木设计的作品充满了日本传统美学的精髓，每一件都让我感受到匠人的用心。特别是RA系列的耳环，简约而不失优雅，已经购入三套了。" },
+    { name: "刘小红", role: "新婚客户 · 上海", text: "定制的结婚戒指完全超出期待！设计师亲自为我们沟通设计，将我们的故事融入每个细节中，这将是我们一生珍藏的纪念。" },
+    { name: "田中裕子", role: "回购客户 · 大阪", text: "已经是第五次购入柏木的作品了。RG系列项链做工精细，佩戴轻盈，收到后完全被包装的用心感动了，非常适合作为礼物。" },
   ];
   return (
     <section className="py-24 bg-stone-900 text-white">
@@ -370,9 +411,9 @@ const ServicesSection = () => (
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {[
-          { icon: '◈', title: '首饰定制', desc: '根据您的需求和喜好，提供个性化的首饰定制服务，为您创造独一无二的作品。', href: '/contact' },
-          { icon: '◉', title: '设计咨询', desc: '专业的设计师团队为您提供珠宝设计咨询，帮助您选择最适合的材质和风格。', href: '/contact' },
-          { icon: '◐', title: 'Schematiq 软件', desc: '自研珠宝设计软件培训，将传统工艺与现代技术完美结合，解放创作潜能。', href: '/services' },
+          { icon: '◈', title: '首饰定制', desc: '与设计师一对一深度沟通，将您的故事与情感融入每一件手工制作的珠宝首饰之中。', href: '/contact' },
+          { icon: '◉', title: '设计咨询', desc: '专业设计团队为您提供材质、款式、风格全方位咨询，从灵感到成品，全程陪伴。', href: '/contact' },
+          { icon: '◇', title: '海外直送', desc: '源自日本的正品珠宝，直邮全球。所有作品经严格品质检验后精心包装发货。', href: '/products' },
         ].map((s) => (
           <div key={s.title} className="group border border-gray-100 p-8 rounded-sm hover:border-accent hover:shadow-md transition-all duration-300">
             <div className="text-3xl text-gray-200 group-hover:text-accent transition-colors duration-300 mb-4">{s.icon}</div>

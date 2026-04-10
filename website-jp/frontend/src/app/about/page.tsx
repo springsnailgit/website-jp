@@ -131,8 +131,8 @@ export default function AboutPage() {
                             },
                             {
                                 name: "高桥龙太",
-                                title: "软件开发负责人",
-                                description: "Schematiq设计软件的核心开发者，计算机科学博士，致力于将数字技术与传统工艺相结合。",
+                                title: "品牌运营总监",
+                                description: "负责柏木设计的品牌推广与海外市场拓展，在日本时尚与奢侈品行业拥有十余年丰富经验。",
                                 image: "/assets/team-4.jpg"
                             }
                         ].map((member, index) => (
