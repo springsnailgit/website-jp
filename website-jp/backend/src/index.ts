@@ -174,22 +174,22 @@ const setupSocketIO = (httpServer: any) => {
  */
 const startServer = async () => {
   try {
-    // 创建应用和服务器（先启动HTTP服务，再连接数据库）
+    // 连接数据库
+    await connectDB();
+
+    // 创建应用和服务器
     const app = createApp();
     const httpServer = createServer(app);
 
     // 配置Socket.IO
     setupSocketIO(httpServer);
 
-    // 先启动HTTP服务器，确保健康检查可以响应
+    // 启动服务器
     const PORT = process.env.PORT || 5000;
     httpServer.listen(PORT, () => {
       console.log(`🚀 服务器运行在 ${process.env.NODE_ENV || 'development'} 模式下，端口 ${PORT}`);
       console.log(`📊 健康检查: http://localhost:${PORT}/health`);
     });
-
-    // 然后连接数据库
-    await connectDB();
 
     // 优雅关闭处理
     process.on('SIGTERM', () => {
