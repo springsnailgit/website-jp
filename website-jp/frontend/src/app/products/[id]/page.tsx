@@ -10,7 +10,8 @@ export async function generateStaticParams() {
         const res = await fetch(`${apiUrl}/api/products?limit=1000`, { cache: 'no-store' });
         const data = await res.json();
         if (data.success && Array.isArray(data.data)) {
-            return data.data.map((p: Product) => ({ id: p._id }));
+            // __shell 必须始终存在，作为 _redirects 的 fallback 目标
+            return [...data.data.map((p: Product) => ({ id: p._id })), { id: '__shell' }];
         }
     } catch {
         // API 不可用时构建仍继续，由 _redirects fallback 兜底
