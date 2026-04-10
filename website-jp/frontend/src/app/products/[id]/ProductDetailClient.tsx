@@ -4,7 +4,6 @@ import MainLayout from '@/components/layout/MainLayout';
 import { API_BASE_URL } from '@/config';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 interface ProductDetail {
@@ -45,9 +44,6 @@ const StarRating = ({ rating }: { rating: number }) => (
 );
 
 export default function ProductDetailClient() {
-    const params = useParams();
-    const id = params?.id as string;
-
     const [product, setProduct] = useState<ProductDetail | null>(null);
     const [related, setRelated] = useState<ProductDetail[]>([]);
     const [loading, setLoading] = useState(true);
@@ -56,7 +52,16 @@ export default function ProductDetailClient() {
     const [imgErrors, setImgErrors] = useState<Record<number, boolean>>({});
 
     useEffect(() => {
-        if (!id || id === '__shell') return;
+        // 从真实 URL 读取产品 ID，避免静态生成 __shell 时 params 不正确的问题
+        const segments = window.location.pathname.split('/').filter(Boolean);
+        const id = segments[segments.length - 1];
+
+        if (!id || id === '__shell') {
+            setError('产品不存在');
+            setLoading(false);
+            return;
+        }
+
         const fetchProduct = async () => {
             try {
                 setLoading(true);
@@ -76,7 +81,7 @@ export default function ProductDetailClient() {
             }
         };
         fetchProduct();
-    }, [id]);
+    }, []);
 
     if (loading) return (
         <MainLayout>
