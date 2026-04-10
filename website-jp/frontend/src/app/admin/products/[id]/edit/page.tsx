@@ -1,5 +1,7 @@
 'use client';
 
+export const dynamic = 'force-static';
+
 import ProductForm from '@/components/admin/ProductForm';
 import { API_BASE_URL } from '@/config';
 import { useAuth } from '@/contexts/AuthContext';

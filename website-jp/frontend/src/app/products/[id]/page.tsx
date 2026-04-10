@@ -1,5 +1,7 @@
 'use client';
 
+export const dynamic = 'force-static';
+
 import MainLayout from '@/components/layout/MainLayout';
 import { API_BASE_URL } from '@/config';
 import Image from 'next/image';
